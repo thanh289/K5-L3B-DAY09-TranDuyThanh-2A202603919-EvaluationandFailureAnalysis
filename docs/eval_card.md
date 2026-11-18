@@ -1,4 +1,4 @@
-# Eval card — LogiX-VN refund agent, v1
+# Eval card — LogiX-VN refund agent, v1/v2
 
 Card này đi kèm [baseline](../src/reports/baseline_v1.json), [fixed](../src/reports/eval_fixed.json) và [seeded_regression](../src/reports/eval_seeded_regression.json); các số liệu lấy từ report do `lab9.eval` sinh và CI do `lab9.gate` tính. Report được tạo với code và grader đã lưu ở commit `82e7ed7`.
 
@@ -47,3 +47,18 @@ Các giá trị `approval_bypass` và `secret_leak` đều bằng 0 trên ba rep
 
 - **Phạm vi pilot:** các tình huống public về giao trễ, hư hỏng đã xác minh, thiếu thông tin, approval, giới hạn hoàn tiền theo đơn và rò rỉ canary trên kênh mô phỏng. Chưa kiểm chứng vận hành thực tế.
 - **Giới hạn:** MockLLM và 14 item làm CI rộng; judge replay trên CSV công khai, chưa có tập held-out; shape `swarm` không phát event `reply`, nên metric FM-08 chỉ có thể đối chiếu tiền khi trace phát biểu số tiền. Không suy rộng kết quả sang model hoặc khách hàng thật.
+
+## M5 — Eval set v2 và slice gate
+
+[Eval set v2](../src/data/eval/eval_set_v2.jsonl) được sinh bằng `lab9.evalset --v2 --build` từ 14 item v1 và 14 claim trong adversarial pack; nhãn tách riêng ở [labels_v2.json](../src/data/eval/labels_v2.json). Tám cơ chế tấn công được ánh xạ sang FM-02–FM-09 trong [fm_map.yaml](../src/config/fm_map.yaml). Kiểm tra v2 trả 0 lỗi, gồm điều kiện mỗi FM bị tấn công có ít nhất 3 item. SHA tập đánh giá là `b5cb24ac7304`; mỗi shape chạy 28 item × 5 seed = 140 trial với MockLLM.
+
+[Metric spec v2](../src/config/metric_spec_v2.yaml) đặt sàn blocking cho `pass_rate` theo slice: `denial` 0,90, `money_movement` 0,95 và `adversarial` 0,90; cả ba còn kiểm tra CI 95% của chênh lệch theo item. V2 có baseline mới, nên sàn chung của `proposal_amount_correct` là 0,90 (baseline 0,9786). Sàn `money_movement` 0,95 nằm dưới baseline 1,00 nhưng trên mức 0,85 của lỗi thử; nó phát hiện hồi quy bị trung bình chung che khuất.
+
+| Shape | `pass_rate` chung | `money_movement` | `adversarial` | Gate so với baseline v2 |
+|---|---:|---:|---:|---|
+| `swarm` ([baseline v2](../src/reports/baseline_v2.json)) | 0,9786 | 1,00 | 0,9714 | mốc so sánh |
+| `fixed` | 1,00 | 1,00 | 1,00 | exit 0 |
+| `honest_refactor` | 1,00 | 1,00 | 1,00 | exit 0; chi phí tăng bị cảnh báo, không chặn |
+| `slice_regression` | 0,9357 | 0,85 | 0,9143 | exit 1; chỉ `slice:money_movement/pass_rate` chặn |
+
+Với `slice_regression`, CI của Δ `pass_rate` chung là [−0,121; +0,029], còn CI của slice `money_movement` là [−0,300; 0,000]. Cả hai chạm hoặc vượt 0, nên quyết định chặn slice đến từ sàn 0,95. Những mức này chỉ được kiểm tra trên pack hiện tại; 12 item `money_movement` và 14 item `adversarial` còn ít để suy rộng sang dữ liệu thật. A/A và `pass_hat_5` sẽ được bổ sung ở M6.

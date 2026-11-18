@@ -72,5 +72,5 @@ Tiền và phê duyệt luôn chấm bằng code. Judge chỉ được dùng cho
 ## Phê duyệt
 | Vai trò | Tên | Ngày |
 |---|---|---|
-| Product | Chờ chủ bài/nhóm sản phẩm xác nhận | Chưa phê duyệt |
-| Eval owner (giữ gate) | Chủ repo fork; cần ghi tên khi nộp | Chưa phê duyệt |
+| Product | Trần Duy Thành | 18/11/2026 |
+| Eval owner (giữ gate) | Chủ repo fork | Chưa phê duyệt |
