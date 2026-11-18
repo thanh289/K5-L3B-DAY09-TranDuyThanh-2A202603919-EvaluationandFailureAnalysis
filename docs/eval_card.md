@@ -61,4 +61,12 @@ Các giá trị `approval_bypass` và `secret_leak` đều bằng 0 trên ba rep
 | `honest_refactor` | 1,00 | 1,00 | 1,00 | exit 0; chi phí tăng bị cảnh báo, không chặn |
 | `slice_regression` | 0,9357 | 0,85 | 0,9143 | exit 1; chỉ `slice:money_movement/pass_rate` chặn |
 
-Với `slice_regression`, CI của Δ `pass_rate` chung là [−0,121; +0,029], còn CI của slice `money_movement` là [−0,300; 0,000]. Cả hai chạm hoặc vượt 0, nên quyết định chặn slice đến từ sàn 0,95. Những mức này chỉ được kiểm tra trên pack hiện tại; 12 item `money_movement` và 14 item `adversarial` còn ít để suy rộng sang dữ liệu thật. A/A và `pass_hat_5` sẽ được bổ sung ở M6.
+Với `slice_regression`, CI của Δ `pass_rate` chung là [−0,121; +0,029], còn CI của slice `money_movement` là [−0,300; 0,000]. Cả hai chạm hoặc vượt 0, nên quyết định chặn slice đến từ sàn 0,95. Những mức này chỉ được kiểm tra trên pack hiện tại; 12 item `money_movement` và 14 item `adversarial` còn ít để suy rộng sang dữ liệu thật.
+
+## M6 — A/A và độ ổn định qua 5 seed
+
+Hai lần chạy `swarm` trên cùng eval set SHA `b5cb24ac7304` dùng các seed 11, 22, 33, 44, 55 ([baseline v2](../src/reports/baseline_v2.json)) và 66, 77, 88, 99, 110 ([A/A v2](../src/reports/aa_v2.json)). Cả hai report có run ID `E-swarm-20261118-b5cb`; xem trường `manifest.seeds` để phân biệt. `lab9.mutation --aa` cho Δ = 0 trên mọi metric của MockLLM: `pass_rate` đều 0,9786, `pass_hat_5` đều 0,8929. Với LLM thật, lấy mẫu, thay đổi hạ tầng hoặc biến động đầu vào có thể tạo dải A/A khác 0; cần đo nhiều lần và đặt sàn dưới dải dao động thường thấy để không chặn PR tốt ngẫu nhiên. Hai bộ seed MockLLM không chứng minh dải nhiễu thực tế bằng 0.
+
+`pass@k` đo khả năng có **ít nhất một** lần thành công trong k lần; `pass^k` (`pass_hat_k`) đo khả năng **cả k lần** đều thành công. [Metric spec v2](../src/config/metric_spec_v2.yaml) được nâng lên phiên bản 2.1 khi thêm `pass_hat_5` blocking với sàn 0,80: thấp hơn cả hai giá trị A/A 0,8929 và cao hơn 0,5714 của [flaky_regression](../src/reports/eval_flaky_regression.json). Variant này có `pass_rate=0,9143` nhưng `pass_hat_5=0,5714`; gate chặn `pass_hat_5` cùng một số metric khác. Scorecard công khai: 3/3 regression bị chặn, 0 báo nhầm (`fixed`, `honest_refactor` đều qua).
+
+Giới hạn: 28 item × 5 seed và MockLLM chưa đủ để ước lượng lỗi hiếm hay nhiễu của model thật. Lỗi chỉ xảy ra ở khoảng 1/3 seed có thể không xuất hiện ổn định với 5 seed; cần thêm seed và item độc lập trước khi dùng ngưỡng này cho release thật.

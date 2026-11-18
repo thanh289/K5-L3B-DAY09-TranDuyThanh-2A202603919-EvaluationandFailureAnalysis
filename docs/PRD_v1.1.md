@@ -69,6 +69,12 @@ Tiền và phê duyệt luôn chấm bằng code. Judge chỉ được dùng cho
 - Thêm item từ [trace case](./trace_case.md), thay nhãn hoặc nguồn → tăng `eval_set_version`, chạy lại baseline và ghi SHA mới.
 - Đổi ngưỡng hoặc metric → tăng `metric_spec_version`, ghi lý do, nguồn A/A nếu có và giữ ratchet khi eval set không đổi.
 
+## 8. Bổ sung M6 cho eval set v2
+
+Tiêu chí độ ổn định của pilot v2 nằm ở [metric_spec_v2.yaml](../src/config/metric_spec_v2.yaml), phiên bản 2.1 sau khi thêm metric: `pass_hat_5` (`pass^5`, tỷ lệ ước lượng cả 5 lần đều thành công) phải ≥ 0,80 và là metric chặn release. [Baseline v2](../src/reports/baseline_v2.json), run ID `E-swarm-20261118-b5cb`, có `pass_hat_5=0,8929` trên 28 item × 5 seed. [Report A/A](../src/reports/aa_v2.json) chạy cùng shape và eval set SHA `b5cb24ac7304` với seed 66, 77, 88, 99, 110 cũng đạt 0,8929; Δ = 0. Hai report có cùng run ID nên phải phân biệt bằng `manifest.seeds`. Sàn 0,80 nằm dưới giá trị A/A quan sát được, dành biên an toàn 0,0929; với LLM thật phải đo lại dải nhiễu A/A và hiệu chỉnh sàn theo dải đó.
+
+[Report `flaky_regression`](../src/reports/eval_flaky_regression.json) có `pass_rate=0,9143` nhưng `pass_hat_5=0,5714`, thấp hơn sàn và bị gate chặn. Scorecard công khai đạt 3/3 regression bị chặn, 0 báo nhầm. Kết quả này chỉ áp dụng cho MockLLM và 5 seed/item; lỗi xuất hiện khoảng 1/3 seed có thể không bị phát hiện ổn định trong mẫu nhỏ. [Eval card](./eval_card.md) ghi chi tiết A/A, slice và giới hạn cỡ mẫu.
+
 ## Phê duyệt
 | Vai trò | Tên | Ngày |
 |---|---|---|
