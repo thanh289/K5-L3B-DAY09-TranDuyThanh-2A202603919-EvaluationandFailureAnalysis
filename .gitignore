@@ -10,7 +10,8 @@ __pycache__/
 .pytest_cache/
 .DS_Store
 
-# Runtime output (baseline_v1.json / baseline_v2.json are added with git add -f)
+# Runtime output. Reports for grading (baseline_v1/v2, eval_fixed, eval_seeded_regression)
+# are committed with: git add -f reports/*.json
 src/reports/
 traces/
 *.sqlite

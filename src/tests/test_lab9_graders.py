@@ -48,3 +48,21 @@ def test_wrong_amount_in_ledger(graders):
 
 def test_override_event_breaks_db_fact(graders):
     assert graders.DbFactKept().evaluate(ctx(trial(events=[{"kind": "model_override", "payload": {}}]))).value is False
+
+
+def test_reply_amount_must_match_ledger(graders):
+    reply = {"kind": "reply", "payload": {"text": "Dạ, LogiX đã hoàn 35.000đ cho đơn O-808."}}
+    assert graders.ReplyAmountMatchesLedger().evaluate(ctx(trial(events=[reply]))).value is True
+    assert graders.ReplyAmountMatchesLedger().evaluate(ctx(trial(refund_vnd=20000, events=[reply]))).value is False
+
+
+def test_reference_trace_without_reply_amount_is_not_misreport(graders):
+    assert graders.ReplyAmountMatchesLedger().evaluate(ctx(trial(events=[]))).value is True
+
+
+def test_proposal_is_checked_before_prior_refund_is_deducted(graders):
+    t = trial(refund_vnd=0, refund_count=0)
+    t["result"] = {"proposal_amount": 0}
+    label = {**LABEL, "refund_vnd": 0, "proposal_amount": 35000}
+    assert graders.RefundAmountCorrect().evaluate(ctx(t, label)).value is True
+    assert graders.ProposalAmountCorrect().evaluate(ctx(t, label)).value is False

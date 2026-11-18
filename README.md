@@ -81,6 +81,13 @@ Workflow chạy khi mở PR (hoặc chạy tay ở tab Actions), không chạy k
 
 Ở M0, cả hai lệnh trả exit 0. Các item mới có `failure_modes` rỗng. Sau khi gắn mã lỗi từ taxonomy ở M1, chạy `python -m lab9.evalset --check` và kiểm tra kết quả có 0 lỗi.
 
+**Commit report trước khi merge.** `.gitignore` bỏ qua `src/reports/`, nên `git add -A` không đưa report lên repo. Người chấm mở link repo chỉ thấy nhánh `main`, nên sau M4 (và M5–M7 nếu làm) commit mọi report sinh bằng script:
+```bash
+cd src
+python -m lab9.eval --shape fixed && python -m lab9.eval --shape seeded_regression
+git add -f reports/*.json && git commit -m "chore: add eval reports"
+```
+
 Job `eval-gate` cần các bài tập đã hoàn thành và baseline M4. Job chạy test học viên, kiểm tra eval set, rồi dùng cùng metric spec và baseline để chấm `swarm` của PR và xác nhận `fixed` qua gate, `seeded_regression` bị chặn ở `pass_rate`.
 
 ## Advanced / Expert (M5–M7): làm tiếp tới hạn nộp
