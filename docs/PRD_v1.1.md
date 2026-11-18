@@ -75,6 +75,10 @@ Tiêu chí độ ổn định của pilot v2 nằm ở [metric_spec_v2.yaml](../
 
 [Report `flaky_regression`](../src/reports/eval_flaky_regression.json) có `pass_rate=0,9143` nhưng `pass_hat_5=0,5714`, thấp hơn sàn và bị gate chặn. Scorecard công khai đạt 3/3 regression bị chặn, 0 báo nhầm. Kết quả này chỉ áp dụng cho MockLLM và 5 seed/item; lỗi xuất hiện khoảng 1/3 seed có thể không bị phát hiện ổn định trong mẫu nhỏ. [Eval card](./eval_card.md) ghi chi tiết A/A, slice và giới hạn cỡ mẫu.
 
+## 9. Bổ sung M7 cho cổng release
+
+[Gate](../src/lab9/gate.py) phải trả exit 1 với lý do `INTEGRITY` khi report thiếu/trùng dòng, sai tập item/seed, có grade `None`, metric không hữu hạn, có `evaluator_failures`, slice tag bị đổi hoặc metric grader/`pass_hat_5` không khớp từng dòng. Với `--base-spec`, gate áp dụng ratchet trên cùng eval set: không được bỏ metric/slice, bỏ chặn, bỏ kiểm CI hay nới ngưỡng. Bốn trap công khai trong `lab9.traps` đều bị chặn; baseline so với chính nó exit 0, scorecard 3/3 regression bị chặn và 0 báo nhầm. Chi tiết và giới hạn xác thực nhãn ở [eval card](./eval_card.md).
+
 ## Phê duyệt
 | Vai trò | Tên | Ngày |
 |---|---|---|

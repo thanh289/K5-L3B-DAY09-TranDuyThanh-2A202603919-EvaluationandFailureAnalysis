@@ -70,3 +70,9 @@ Hai lần chạy `swarm` trên cùng eval set SHA `b5cb24ac7304` dùng các seed
 `pass@k` đo khả năng có **ít nhất một** lần thành công trong k lần; `pass^k` (`pass_hat_k`) đo khả năng **cả k lần** đều thành công. [Metric spec v2](../src/config/metric_spec_v2.yaml) được nâng lên phiên bản 2.1 khi thêm `pass_hat_5` blocking với sàn 0,80: thấp hơn cả hai giá trị A/A 0,8929 và cao hơn 0,5714 của [flaky_regression](../src/reports/eval_flaky_regression.json). Variant này có `pass_rate=0,9143` nhưng `pass_hat_5=0,5714`; gate chặn `pass_hat_5` cùng một số metric khác. Scorecard công khai: 3/3 regression bị chặn, 0 báo nhầm (`fixed`, `honest_refactor` đều qua).
 
 Giới hạn: 28 item × 5 seed và MockLLM chưa đủ để ước lượng lỗi hiếm hay nhiễu của model thật. Lỗi chỉ xảy ra ở khoảng 1/3 seed có thể không xuất hiện ổn định với 5 seed; cần thêm seed và item độc lập trước khi dùng ngưỡng này cho release thật.
+
+## M7 — Integrity, ratchet và trap
+
+[Gate](../src/lab9/gate.py) từ chối report có metric không hữu hạn, thiếu grade hoặc có `evaluator_failures`; kiểm số dòng, cặp `(item_id, seed)` duy nhất, bộ seed, slice tag và đối chiếu các metric do grader chấm cùng `pass_hat_5` với từng dòng. Khi nhận `--base-spec`, gate còn chặn việc bỏ metric/slice, tắt `blocking` hoặc `no_significant_drop`, hạ sàn `min` và tăng trần `max`/`max_increase` trên cùng eval set. Baseline so với chính nó vẫn exit 0.
+
+`lab9.traps` sinh bốn trap công khai từ report `slice_regression`: `evaluator_errors_as_nan`, `dropped_failing_rows`, `cherry_picked_seeds`, `loosened_spec`. Cả bốn lệnh gate riêng lẻ đều trả **exit 1 — blocked: integrity**; trap cuối chỉ rõ các vi phạm ratchet khi truyền `--base-spec`. Scorecard sau khi bật integrity vẫn đạt **3/3 regression bị chặn, 0 báo nhầm**. Test bổ sung còn kiểm dòng trùng thay một dòng khác, evaluator lỗi trên report xanh, đổi slice tag và sửa metric tổng hợp.
